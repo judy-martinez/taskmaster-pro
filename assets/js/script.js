@@ -3,10 +3,12 @@ var tasks = {};
 var createTask = function(taskText, taskDate, taskList) {
   // create elements that make up a task item
   var taskLi = $("<li>").addClass("list-group-item");
-
-  var taskSpan = $("<span>").addClass("badge badge-primary badge-pill").text(taskDate);
-
-  var taskP = $("<p>").addClass("m-1").text(taskText);
+  var taskSpan = $("<span>")
+    .addClass("badge badge-primary badge-pill")
+    .text(taskDate);
+  var taskP = $("<p>")
+    .addClass("m-1")
+    .text(taskText);
 
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
@@ -32,7 +34,7 @@ var loadTasks = function() {
   }
 
   // loop over object properties
-  $.each(tasks, function(list, arr) {    
+  $.each(tasks, function(list, arr) {
     // then loop over sub-array
     arr.forEach(function(task) {
       createTask(task.text, task.date, list);
@@ -46,8 +48,10 @@ var saveTasks = function() {
 
 var auditTask = function(taskEl) {
   // get date from task element
-  var date = $(taskEl).find("span").text().trim();
-  console.log(date);
+  var date = $(taskEl)
+    .find("span")
+    .text()
+    .trim();
 
   // convert to moment object at 5:00pm
   var time = moment(date, "L").set("hour", 17);
@@ -84,33 +88,34 @@ $(".card .list-group").sortable({
   out: function(event) {
     $(event.target).removeClass("dropover-active");
   },
-  update: function(event) {
-    // array to store the task data in
+  update: function() {
     var tempArr = [];
 
     // loop over current set of children in sortable list
-    $(this).children().each(function() {
-      // save values in temp array
-      tempArr.push({
-        text: $(this)
-          .find("p")
-          .text()
-          .trim(),
-        date: $(this)
-          .find("span")
-          .text()
-          .trim()
+    $(this)
+      .children()
+      .each(function() {
+        // save values in temp array
+        tempArr.push({
+          text: $(this)
+            .find("p")
+            .text()
+            .trim(),
+          date: $(this)
+            .find("span")
+            .text()
+            .trim()
+        });
       });
-    });
 
-  // trim down list's ID to match object property
-  var arrName = $(this)
-  .attr("id")
-  .replace("list-", "");
+    // trim down list's ID to match object property
+    var arrName = $(this)
+      .attr("id")
+      .replace("list-", "");
 
-  // update array on tasks object and save
-  tasks[arrName] = tempArr;
-  saveTasks();
+    // update array on tasks object and save
+    tasks[arrName] = tempArr;
+    saveTasks();
   }
 });
 
@@ -121,12 +126,14 @@ $("#trash").droppable({
   drop: function(event, ui) {
     // remove dragged element from the dom
     ui.draggable.remove();
+    $(".bottom-trash").removeClass("bottom-trash-active");
   },
   over: function(event, ui) {
     console.log(ui);
+    $(".bottom-trash").addClass("bottom-trash-active");
   },
   out: function(event, ui) {
-    console.log(ui);
+    $(".bottom-trash").removeClass("bottom-trash-active");
   }
 });
 
@@ -149,7 +156,7 @@ $("#task-form-modal").on("shown.bs.modal", function() {
 });
 
 // save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
+$("#task-form-modal .btn-save").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
@@ -230,7 +237,7 @@ $(".list-group").on("click", "span", function() {
   dateInput.datepicker({
     minDate: 1,
     onClose: function() {
-      // when calendar is closed, force a "change" event on the `dateInput`
+      // when calendar is closed, force a "change" event
       $(this).trigger("change");
     }
   });
@@ -240,16 +247,14 @@ $(".list-group").on("click", "span", function() {
 });
 
 // value of due date was changed
-$(".list-group").on("blur", "input[type='text']", function() {
-  // get current text
-  var date = $(this).val()
+$(".list-group").on("change", "input[type='text']", function() {
+  var date = $(this).val();
 
   // get status type and position in the list
   var status = $(this)
     .closest(".list-group")
     .attr("id")
     .replace("list-", "");
-  // get the task's position in the list of other li elements
   var index = $(this)
     .closest(".list-group-item")
     .index();
@@ -285,6 +290,3 @@ setInterval(function() {
     auditTask($(this));
   });
 }, 1800000);
-
-
-
